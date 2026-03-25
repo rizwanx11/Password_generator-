@@ -1,133 +1,572 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<title>Password Generator</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KeyForge \u2014 Password Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* =============================================
+       CSS CUSTOM PROPERTIES & RESET
+    ============================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-<style>
-body {
-    margin: 0;
-    height: 100vh;
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.container {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(15px);
-    padding: 30px;
-    border-radius: 20px;
-    text-align: center;
-    width: 300px;
-    box-shadow: 0 0 30px rgba(0,0,0,0.4);
-}
-
-h2 {
-    margin-bottom: 20px;
-    color: #fff;
-}
-
-input {
-    width: 80%;
-    padding: 10px;
-    border-radius: 10px;
-    border: none;
-    outline: none;
-    text-align: center;
-    font-size: 16px;
-}
-
-button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.generate {
-    background: #22c55e;
-    color: white;
-}
-
-.generate:hover {
-    background: #16a34a;
-}
-
-.copy {
-    background: #3b82f6;
-    color: white;
-}
-
-.copy:hover {
-    background: #2563eb;
-}
-
-#result {
-    margin-top: 15px;
-    word-break: break-all;
-    font-weight: bold;
-    color: #22c55e;
-}
-
-.strength {
-    margin-top: 10px;
-    font-size: 14px;
-}
-
-</style>
-</head>
-
-<body>
-
-<div class="container">
-    <h2>🔐 Password Generator</h2>
-
-    <input type="number" id="length" value="8" min="4" max="20">
-
-    <button class="generate" onclick="generatePassword()">Generate Password</button>
-
-    <div id="result"></div>
-
-    <div class="strength" id="strength"></div>
-
-    <button class="copy" onclick="copyPassword()">Copy</button>
-</div>
-
-<script>
-function generatePassword() {
-    let length = document.getElementById("length").value;
-    let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-    let password = "";
-
-    for (let i = 0; i < length; i++) {
-        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    :root {
+      --bg-1: #0a0a12;
+      --bg-2: #0f0f1e;
+      --surface: rgba(255,255,255,0.04);
+      --surface-2: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.08);
+      --border-active: rgba(130,100,255,0.5);
+      --text-primary: #f0eeff;
+      --text-secondary: rgba(240,238,255,0.5);
+      --text-muted: rgba(240,238,255,0.25);
+      --accent: #8264ff;
+      --accent-2: #c084fc;
+      --accent-glow: rgba(130,100,255,0.35);
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --radius: 20px;
+      --radius-sm: 12px;
+      --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    document.getElementById("result").innerText = password;
+    [data-theme="light"] {
+      --bg-1: #f0eeff;
+      --bg-2: #e8e4ff;
+      --surface: rgba(0,0,0,0.04);
+      --surface-2: rgba(0,0,0,0.07);
+      --border: rgba(0,0,0,0.08);
+      --border-active: rgba(100,60,220,0.4);
+      --text-primary: #120d2e;
+      --text-secondary: rgba(18,13,46,0.55);
+      --text-muted: rgba(18,13,46,0.28);
+      --accent: #6440e8;
+      --accent-2: #a855f7;
+      --accent-glow: rgba(100,64,232,0.25);
+    }
 
-    // Strength checker
-    let strengthText = "";
-    if (length < 6) strengthText = "Weak 😢";
-    else if (length < 10) strengthText = "Medium 😐";
-    else strengthText = "Strong 💪";
+    /* =============================================
+       BASE
+    ============================================= */
+    html { font-size: 16px; scroll-behavior: smooth; }
 
-    document.getElementById("strength").innerText = "Strength: " + strengthText;
-}
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg-1);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      position: relative;
+      overflow-x: hidden;
+      transition: background var(--transition), color var(--transition);
+    }
 
-function copyPassword() {
-    let text = document.getElementById("result").innerText;
-    navigator.clipboard.writeText(text);
-    alert("Copied!");
-}
-</script>
+    /* =============================================
+       ANIMATED BACKGROUND
+    ============================================= */
+    .bg-orbs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.18;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    [data-theme="light"] .orb { opacity: 0.12; }
+    .orb-1 { width: 500px; height: 500px; background: var(--accent); top: -180px; left: -160px; animation-delay: 0s; }
+    .orb-2 { width: 400px; height: 400px; background: var(--accent-2); bottom: -120px; right: -120px; animation-delay: -7s; }
+    .orb-3 { width: 300px; height: 300px; background: #06b6d4; top: 50%; left: 60%; animation-delay: -13s; opacity: 0.09; }
 
-</body>
-</html>
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(40px, 30px) scale(1.08); }
+    }
+
+    /* =============================================
+       CARD
+    ============================================= */
+    .card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 32px 32px;
+      box-shadow: 0 8px 48px rgba(0,0,0,0.28), 0 0 0 1px var(--border);
+      animation: cardIn 0.6s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* =============================================
+       HEADER
+    ============================================= */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .logo-text {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--text-primary) 40%, var(--accent-2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Theme toggle */
+    .theme-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      color: var(--text-secondary);
+    }
+    .theme-btn:hover { background: var(--surface-2); transform: rotate(15deg) scale(1.1); box-shadow: 0 0 14px var(--accent-glow); }
+
+    /* =============================================
+       PASSWORD DISPLAY
+    ============================================= */
+    .password-box {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .password-box::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .password-box.copied::before { opacity: 1; animation: shinePass 0.5s ease; }
+    @keyframes shinePass {
+      from { transform: translateX(-100%); opacity: 0.5; }
+      to   { transform: translateX(100%); opacity: 0; }
+    }
+    .password-box:focus-within { border-color: var(--border-active); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+    #password-display {
+      flex: 1;
+      font-family: 'DM Mono', monospace;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: transparent;
+      border: none;
+      outline: none;
+      letter-spacing: 0.04em;
+      width: 100%;
+      min-width: 0;
+      cursor: default;
+      user-select: all;
+    }
+    #password-display.blurred { filter: blur(5px); transition: filter 0.2s; }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 4px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      transition: color var(--transition), background var(--transition), transform var(--transition);
+      flex-shrink: 0;
+    }
+    .icon-btn:hover { color: var(--text-primary); background: var(--surface-2); transform: scale(1.12); }
+    .icon-btn:active { transform: scale(0.92); }
+    .icon-btn.success { color: var(--green) !important; }
+
+    /* =============================================
+       STRENGTH BAR
+    ============================================= */
+    .strength-wrap {
+      margin-bottom: 22px;
+    }
+    .strength-label {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    #strength-text {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      transition: color var(--transition);
+    }
+    .strength-bars { display: flex; gap: 5px; }
+    .bar {
+      height: 4px;
+      flex: 1;
+      border-radius: 99px;
+      background: var(--border);
+      transition: background 0.4s cubic-bezier(0.4,0,0.2,1), transform 0.2s;
+      transform-origin: left;
+    }
+    .bar.active { transform: scaleY(1.6); }
+
+    /* =============================================
+       LENGTH CONTROL
+    ============================================= */
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .length-control {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      flex: 1;
+      height: 5px;
+      border-radius: 99px;
+      background: var(--border);
+      outline: none;
+      cursor: pointer;
+      position: relative;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 10px var(--accent-glow);
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+      box-shadow: 0 0 18px var(--accent-glow);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border: none;
+      box-shadow: 0 0 10px var(--accent-glow);
+      cursor: pointer;
+    }
+
+    .length-input {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      width: 54px;
+      height: 40px;
+      text-align: center;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .length-input:focus { border-color: var(--border-active); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .length-input.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(248,113,113,0.2); }
+
+    /* =============================================
+       TOGGLES
+    ============================================= */
+    .toggles-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-bottom: 24px;
+    }
+
+    .toggle-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+      user-select: none;
+    }
+    .toggle-item:hover { border-color: var(--border-active); background: var(--surface); }
+    .toggle-item.active {
+      border-color: var(--accent);
+      background: rgba(130,100,255,0.08);
+      box-shadow: 0 0 0 1px var(--accent-glow) inset;
+    }
+    [data-theme="light"] .toggle-item.active { background: rgba(100,64,232,0.06); }
+
+    .toggle-checkbox {
+      position: relative;
+      width: 32px; height: 18px;
+      flex-shrink: 0;
+    }
+    .toggle-checkbox input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: var(--border);
+      border-radius: 99px;
+      transition: background var(--transition);
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .toggle-checkbox input:checked ~ .toggle-track { background: var(--accent); }
+    .toggle-checkbox input:checked ~ .toggle-track::after {
+      transform: translateX(14px);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .toggle-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: color var(--transition);
+      letter-spacing: 0.01em;
+    }
+    .toggle-item.active .toggle-label { color: var(--text-primary); }
+
+    /* =============================================
+       ERROR MESSAGE
+    ============================================= */
+    .error-msg {
+      font-size: 0.75rem;
+      color: var(--red);
+      font-weight: 500;
+      display: flex; align-items: center; gap: 5px;
+      margin-top: -16px;
+      margin-bottom: 16px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity var(--transition), transform var(--transition);
+    }
+    .error-msg.visible { opacity: 1; transform: translateY(0); }
+
+    /* =============================================
+       BUTTONS
+    ============================================= */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      border: none; cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      border-radius: var(--radius-sm);
+      padding: 13px 20px;
+      transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition), background var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.08);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .btn:hover::after { opacity: 1; }
+    .btn:active { transform: scale(0.96) !important; }
+
+    .btn-primary {
+      flex: 1;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      color: #fff;
+      box-shadow: 0 4px 18px var(--accent-glow);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--accent-glow); }
+
+    .btn-secondary {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .btn-secondary:hover { border-color: var(--border-active); color: var(--text-primary); transform: translateY(-2px); }
+
+    .btn .spin { display: inline-block; animation: spin 0.5s ease; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* =============================================
+       TOAST NOTIFICATION
+    ============================================= */
+    .toast {
+      position: fixed;
+      bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--surface-2);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 11px 20px;
+      border-radius: 100px;
+      display: flex; align-items: center; gap: 8px;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+
+    /* =============================================
+       RESPONSIVE
+    ============================================= */
+    @media (max-width: 480px) {
+      .card { padding: 28px 20px 24px; }
+      .toggles-grid { grid-template-columns: 1fr 1fr; gap: 7px; }
+      .btn { padding: 12px 16px; font-size: 0.85rem; }
+    }
+    @media (max-width: 340px) {
+      .toggles-grid { grid-template-columns: 1fr; }
+    }
+
+    /* =============================================
+       SCROLLBAR
+    ============================================= */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+  </style>
+</head>
+<body>
+
+<!-- Ambient orbs -->
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- MAIN CARD -->
+<div class="card" role="main" aria-label="Password Generator">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon" aria-hidden="true">\ud83d\udd11</div>
+      <span class="logo-text">KeyForge</span>
+    </div>
+    <button class="theme-btn" id="theme-btn" aria-label="Toggle dark/light mode" title="Toggle theme">\ud83c\udf19</button>
+  </div>
+
+  <!-- Password Display -->
+  <div class="password-box" id="password-box">
+    <input
+      type="text"
+      id="password-display"
+      readonly
+      aria-label="Generated password"
+      placeholder="Click generate\u2026"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <!-- Show/Hide -->
+    <button class="icon-btn" id="visibility-btn" aria-label="Toggle password visibility" title="Show/Hide">
+      <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    </button>
+    <!-- Copy -->
+    <button class="icon-btn" id="copy-btn" aria-label="Copy password" title="Copy to clipboard">
+      <svg id="copy-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Strength Indicator -->
+  <div class="strength-wrap">
+    <div class="strength-label">
+      <span>Strength</span>
+      <span id="strength-text" style="color: var(--text-muted)">\u2014</span>
+    </div>
+    <div class="strength-bars" role="progressbar" aria-label="Password strength">
+      <div class="bar" id="bar-1"></div>
+      <div class="bar" id="bar-2"></div>
+      <div class="bar" id="bar-3"></div>
+      <div class="bar" id="bar-4"></div>
+    </div>
+  </div>
+
+  <!-- Length -->
+  <p class="section-label">Length</p>
+  <div class="length-control">
+    <input type="range" id="length-slider" min="4" max="64" value="16" aria-label="Password length slider" />
+    <input type="number" id="length-input" class="length-input" min="4" max="64" value="16" aria-label="Password length number" />
+  </div>
+  <p class="error-msg" id="error-msg" role="alert" aria-live="polite">
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-
