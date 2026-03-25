@@ -3,49 +3,102 @@
 <head>
 <meta charset="UTF-8">
 <title>Password Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 body {
-    font-family: Arial;
+    margin: 0;
+    height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    padding: 30px;
+    border-radius: 20px;
     text-align: center;
-    background: #0f172a;
-    color: white;
-    padding: 50px;
+    width: 300px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.4);
 }
-.box {
-    background: #1e293b;
-    padding: 20px;
+
+h2 {
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+input {
+    width: 80%;
+    padding: 10px;
     border-radius: 10px;
-    display: inline-block;
-}
-button {
-    padding: 10px 20px;
-    margin: 10px;
     border: none;
+    outline: none;
+    text-align: center;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.generate {
     background: #22c55e;
     color: white;
-    cursor: pointer;
 }
-input {
-    padding: 10px;
-    width: 60px;
+
+.generate:hover {
+    background: #16a34a;
 }
+
+.copy {
+    background: #3b82f6;
+    color: white;
+}
+
+.copy:hover {
+    background: #2563eb;
+}
+
+#result {
+    margin-top: 15px;
+    word-break: break-all;
+    font-weight: bold;
+    color: #22c55e;
+}
+
+.strength {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="box">
-<h2>Password Generator 🔐</h2>
+<div class="container">
+    <h2>🔐 Password Generator</h2>
 
-<input type="number" id="length" value="8" min="4" max="20">
+    <input type="number" id="length" value="8" min="4" max="20">
 
-<br><br>
+    <button class="generate" onclick="generatePassword()">Generate Password</button>
 
-<button onclick="generatePassword()">Generate</button>
+    <div id="result"></div>
 
-<p id="result"></p>
+    <div class="strength" id="strength"></div>
 
-<button onclick="copyPassword()">Copy</button>
+    <button class="copy" onclick="copyPassword()">Copy</button>
 </div>
 
 <script>
@@ -59,6 +112,14 @@ function generatePassword() {
     }
 
     document.getElementById("result").innerText = password;
+
+    // Strength checker
+    let strengthText = "";
+    if (length < 6) strengthText = "Weak 😢";
+    else if (length < 10) strengthText = "Medium 😐";
+    else strengthText = "Strong 💪";
+
+    document.getElementById("strength").innerText = "Strength: " + strengthText;
 }
 
 function copyPassword() {
